@@ -43,3 +43,4 @@ describe("Honest Ranking Algorithm (Bayesian Weighted Average)", () => {
     assert.strictEqual(poorPlace < mediocrePlace, true);
   });
 });
+

@@ -49,3 +49,4 @@ export function calculateBayesianRating(
   // Return rounded to 2 decimal places for clean display and consistency
   return Math.round(weightedRating * 100) / 100;
 }
+
