@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  reviews   Review[]
+  bookings  Booking[]
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Place {
+  id           String     @id @default(uuid())
+  name         String
+  category     String
+  description  String     @db.Text
+  openingHours String     @map("opening_hours")
+  reviews      Review[]
+  tourSlots    TourSlot[]
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@map("places")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  placeId   String   @map("place_id")
+  userId    String   @map("user_id")
+  rating    Int
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([placeId, userId])
+  @@map("reviews")
+}
+
+model TourSlot {
+  id        String    @id @default(uuid())
+  placeId   String    @map("place_id")
+  startsAt  DateTime  @map("starts_at")
+  capacity  Int
+  bookings  Booking[]
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@map("tour_slots")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  slotId    String   @map("slot_id")
+  userId    String   @map("user_id")
+  seats     Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  slot TourSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+}
