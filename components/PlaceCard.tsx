@@ -68,3 +68,4 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
     </div>
   );
 }
+

@@ -87,3 +87,4 @@ Covered by an automated stress test ([tests/booking-concurrency.test.ts](file://
    * Integrate Server-Sent Events (SSE) or WebSockets to broadcast remaining seat counts to viewing travellers as bookings occur, giving travellers real-time visual feedback when a tour is filling up.
 4. **Hold / Reservation Expiry Pipeline:**
    * Add a temporary 5-minute seat hold table for checkout flows so travellers can review tour details before finalizing payment.
+

@@ -153,3 +153,4 @@ export function PlaceDetail({
     </div>
   );
 }
+

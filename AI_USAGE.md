@@ -38,3 +38,4 @@ In accordance with Section 5 of the take-home specification, this document trans
 * **The Issue:** The AI originally suggested running Docker Compose with standard port mapping `5432:5432`.
 * **How we noticed:** Running `docker run` failed with `address already in use` because a local host PostgreSQL service was already running on port 5432.
 * **Resolution:** We mapped port `5433:5432` in `docker-compose.yml` with a configurable fallback (`${POSTGRES_PORT:-5433}`), updated `.env` and `.env.example`, and verified connection health without disturbing the host system.
+

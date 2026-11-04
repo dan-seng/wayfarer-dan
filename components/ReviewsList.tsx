@@ -53,3 +53,4 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
     </div>
   );
 }
+
