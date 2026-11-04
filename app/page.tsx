@@ -1,67 +1,168 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Header, User } from "@/components/Header";
+import { PlaceCard, PlaceListItem } from "@/components/PlaceCard";
+import { PlaceDetail } from "@/components/PlaceDetail";
+
+const CATEGORIES = ["All", "History", "Food", "Nature"];
 
 export default function Home() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [sortOption, setSortOption] = useState<string>("top_rated");
+  const [places, setPlaces] = useState<PlaceListItem[]>([]);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 1. Fetch Users on mount
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch("/api/users");
+        if (res.ok) {
+          const data = await res.json();
+          setUsers(data.users || []);
+          if (data.users && data.users.length > 0) {
+            setActiveUser(data.users[0]); // Default to Sara
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      }
+    }
+    fetchUsers();
+  }, []);
+
+  // 2. Fetch Places based on category & sort option
+  const fetchPlaces = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCategory !== "All") {
+        params.set("category", selectedCategory);
+      }
+      params.set("sort", sortOption);
+
+      const res = await fetch(`/api/places?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch places");
+      }
+      const data = await res.json();
+      const placeList: PlaceListItem[] = data.places || [];
+      setPlaces(placeList);
+
+      // Keep current selection if still in filtered list; otherwise pick the first place
+      if (placeList.length > 0) {
+        setSelectedPlaceId((current) => {
+          const stillExists = placeList.some((p) => p.id === current);
+          return stillExists ? current : placeList[0].id;
+        });
+      } else {
+        setSelectedPlaceId(null);
+      }
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Error loading places"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, sortOption]);
+
+  useEffect(() => {
+    fetchPlaces();
+  }, [fetchPlaces]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <div className="min-h-screen bg-zinc-100/70 text-zinc-900 flex flex-col font-sans">
+      {/* Header with Acting-As Switcher and Category Pills */}
+      <Header
+        users={users}
+        selectedUser={activeUser}
+        onSelectUser={setActiveUser}
+        categories={CATEGORIES}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+
+      {/* Main Two-Column Layout */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Places List with Backend Sort */}
+          <section className="lg:col-span-5 bg-white border border-zinc-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col">
+            {/* Sorting controls */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
+              <span className="text-xs font-bold text-zinc-700 tracking-tight">
+                Places ({places.length})
+              </span>
+
+              <div className="flex items-center gap-1.5 text-xs">
+                <label htmlFor="sort-select" className="text-zinc-500 font-medium">
+                  Sort:
+                </label>
+                <div className="relative">
+                  <select
+                    id="sort-select"
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    className="appearance-none bg-zinc-50 hover:bg-zinc-100 border border-zinc-300 text-zinc-900 font-semibold rounded-lg pl-2.5 pr-7 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="top_rated">Top rated (Honest)</option>
+                    <option value="most_reviewed">Most reviewed</option>
+                    <option value="highest_raw">Highest raw stars</option>
+                    <option value="name">Name (A-Z)</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-zinc-500 text-[10px]">
+                    ▼
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Places List */}
+            {loading && places.length === 0 ? (
+              <div className="space-y-3 py-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-20 bg-zinc-100 rounded-xl animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : error ? (
+              <div className="p-4 bg-rose-50 text-rose-700 rounded-xl text-xs">
+                {error}
+              </div>
+            ) : places.length === 0 ? (
+              <p className="text-xs text-zinc-500 italic py-8 text-center">
+                No places found in category &ldquo;{selectedCategory}&rdquo;.
+              </p>
+            ) : (
+              <div className="space-y-2.5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
+                {places.map((place) => (
+                  <PlaceCard
+                    key={place.id}
+                    place={place}
+                    isSelected={place.id === selectedPlaceId}
+                    onSelect={() => setSelectedPlaceId(place.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Right Column: Place Details, Tour Booking, Reviews */}
+          <section className="lg:col-span-7">
+            <PlaceDetail
+              placeId={selectedPlaceId}
+              activeUser={activeUser}
+              onDataChanged={fetchPlaces}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </section>
         </div>
       </main>
     </div>
