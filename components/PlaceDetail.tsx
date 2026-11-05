@@ -104,14 +104,22 @@ export function PlaceDetail({
                 {place.category}
               </span>
               <span className="text-zinc-400">·</span>
-              <span className="font-bold text-zinc-900 flex items-center gap-0.5">
-                {place.averageRating.toFixed(1)}{" "}
-                <span className="text-amber-500">★</span>
-              </span>
-              <span>
-                ({place.reviewCount}{" "}
-                {place.reviewCount === 1 ? "review" : "reviews"})
-              </span>
+              {place.reviewCount === 0 ? (
+                <span className="font-medium text-zinc-500 italic">
+                  No ratings yet
+                </span>
+              ) : (
+                <>
+                  <span className="font-bold text-zinc-900 flex items-center gap-0.5">
+                    {place.averageRating.toFixed(1)}{" "}
+                    <span className="text-amber-500">★</span>
+                  </span>
+                  <span>
+                    ({place.reviewCount}{" "}
+                    {place.reviewCount === 1 ? "review" : "reviews"})
+                  </span>
+                </>
+              )}
               <span className="text-zinc-400">·</span>
               <span className="text-zinc-700">{place.openingHours}</span>
             </div>

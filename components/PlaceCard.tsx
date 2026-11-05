@@ -45,18 +45,30 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
       </div>
 
       <div className="mt-1.5 flex items-center gap-2 text-xs text-zinc-600">
-        <span className="font-bold text-zinc-900 flex items-center gap-0.5">
-          {place.averageRating.toFixed(1)}{" "}
-          <span className="text-amber-500">★</span>
-        </span>
-        <span className="text-zinc-400">·</span>
-        <span>
-          {place.reviewCount} {place.reviewCount === 1 ? "review" : "reviews"}
-        </span>
-        <span className="text-zinc-400">·</span>
-        <span className="text-[11px] text-blue-700 font-medium bg-blue-50 px-1.5 py-0.5 rounded">
-          Honest: {place.bayesianRating.toFixed(2)}
-        </span>
+        {place.reviewCount === 0 ? (
+          <>
+            <span className="font-medium text-zinc-500 italic">No ratings yet</span>
+            <span className="text-zinc-400">·</span>
+            <span className="text-[11px] text-zinc-600 font-medium bg-zinc-100 px-1.5 py-0.5 rounded">
+              Honest: {place.bayesianRating.toFixed(2)}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="font-bold text-zinc-900 flex items-center gap-0.5">
+              {place.averageRating.toFixed(1)}{" "}
+              <span className="text-amber-500">★</span>
+            </span>
+            <span className="text-zinc-400">·</span>
+            <span>
+              {place.reviewCount} {place.reviewCount === 1 ? "review" : "reviews"}
+            </span>
+            <span className="text-zinc-400">·</span>
+            <span className="text-[11px] text-blue-700 font-medium bg-blue-50 px-1.5 py-0.5 rounded">
+              Honest: {place.bayesianRating.toFixed(2)}
+            </span>
+          </>
+        )}
       </div>
 
       {isOneReviewBenchmark && (
