@@ -7,15 +7,45 @@ import {
 } from "../lib/ranking";
 
 describe("Honest Ranking Algorithm (Bayesian Weighted Average)", () => {
-  it("ensures a museum with 312 reviews averaging 4.7 beats a café with 1 review of 5.0", () => {
-    const museumScore = calculateBayesianRating(312, 4.7);
-    const cafeScore = calculateBayesianRating(1, 5.0);
+  it("proves that a place with one 5-star review doesn't outrank an established place with hundreds of reviews and a strong average", () => {
+    const brandNewPlace = {
+      name: "Brand-new café",
+      reviews: 1,
+      averageRating: 5.0,
+      naiveScore: 5.0,
+      honestScore: calculateBayesianRating(1, 5.0),
+    };
 
-    // Museum: (312/317)*4.7 + (5/317)*3.5 ≈ 4.68
-    // Cafe:   (1/6)*5.0 + (5/6)*3.5 ≈ 3.75
-    assert.strictEqual(museumScore > cafeScore, true, "Museum score must be greater than Cafe score");
-    assert.strictEqual(museumScore, 4.68);
-    assert.strictEqual(cafeScore, 3.75);
+    const establishedPlace = {
+      name: "National Museum",
+      reviews: 312,
+      averageRating: 4.7,
+      naiveScore: 4.7,
+      honestScore: calculateBayesianRating(312, 4.7),
+    };
+
+    // 1. Under naive arithmetic average, the 1-review cafe erroneously outranks the museum
+    assert.strictEqual(
+      brandNewPlace.naiveScore > establishedPlace.naiveScore,
+      true,
+      "Demonstrating the original bug: naive average ranks 5.0 > 4.7"
+    );
+
+    // 2. Under Bayesian honest ranking, the high-volume museum decisively wins
+    assert.strictEqual(
+      establishedPlace.honestScore > brandNewPlace.honestScore,
+      true,
+      "Established place must outrank single-review place"
+    );
+    assert.strictEqual(brandNewPlace.honestScore, 3.75);
+    assert.strictEqual(establishedPlace.honestScore, 4.68);
+
+    // 3. Verify resulting sort order: established place is ranked #1
+    const rankedList = [brandNewPlace, establishedPlace].sort(
+      (a, b) => b.honestScore - a.honestScore
+    );
+    assert.strictEqual(rankedList[0].name, "National Museum");
+    assert.strictEqual(rankedList[1].name, "Brand-new café");
   });
 
   it("handles places with 0 reviews gracefully by returning baseline", () => {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_PRIOR_WEIGHT, DEFAULT_BASELINE_RATING } from "@/lib/ranking";
+import { calculateBayesianRating, DEFAULT_PRIOR_WEIGHT, DEFAULT_BASELINE_RATING } from "@/lib/ranking";
 
 export async function GET(
   _request: NextRequest,
@@ -63,16 +63,11 @@ export async function GET(
           ) / 10
         : 0;
 
-    const m = DEFAULT_PRIOR_WEIGHT;
-    const C = DEFAULT_BASELINE_RATING;
-    const bayesianRating =
-      reviewCount > 0
-        ? Math.round(
-            ((reviewCount / (reviewCount + m)) * averageRating +
-              (m / (reviewCount + m)) * C) *
-              100
-          ) / 100
-        : C;
+    // Use centralized Bayesian rating calculation for consistency
+    const bayesianRating = calculateBayesianRating(reviewCount, averageRating, {
+      priorWeight: DEFAULT_PRIOR_WEIGHT,
+      baselineRating: DEFAULT_BASELINE_RATING,
+    });
 
     return NextResponse.json({
       place: {
