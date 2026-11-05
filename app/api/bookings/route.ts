@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const requestedSeats = Number(seats);
     if (!Number.isInteger(requestedSeats) || requestedSeats <= 0) {
       return NextResponse.json(
-        { error: "Number of seats must be a positive integer" },
+        { error: "Seat quantity must be a positive integer (at least 1 seat)." },
         { status: 400 }
       );
     }
@@ -43,17 +43,18 @@ export async function POST(request: NextRequest) {
           error: result.error ?? "Failed to complete booking",
           remainingSeats: result.remainingSeats ?? 0,
         },
-        { status: 409 }
+        { status: result.statusCode ?? 409 }
       );
     }
 
     return NextResponse.json(
       {
-        message: "Booking confirmed successfully!",
+        message: result.message ?? "Booking confirmed successfully!",
         bookingId: result.bookingId,
         remainingSeats: result.remainingSeats,
+        isDuplicateRetry: result.isDuplicateRetry ?? false,
       },
-      { status: 201 }
+      { status: result.statusCode ?? 201 }
     );
   } catch (error) {
     console.error("Failed to process booking:", error);
@@ -63,4 +64,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

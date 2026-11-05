@@ -112,5 +112,96 @@ describe("Tour Booking Concurrency Protection", () => {
       `Database integrity check: total booked seats should be 5, found ${totalBookings._sum.seats}`
     );
   });
+
+  it("rejects zero or negative seat quantities", async () => {
+    const zeroSeats = await bookTourSlot({
+      slotId: testSlotId,
+      userId: testUsers[0].id,
+      seats: 0,
+    });
+    assert.strictEqual(zeroSeats.success, false);
+    assert.strictEqual(zeroSeats.statusCode, 400);
+
+    const negativeSeats = await bookTourSlot({
+      slotId: testSlotId,
+      userId: testUsers[0].id,
+      seats: -3,
+    });
+    assert.strictEqual(negativeSeats.success, false);
+    assert.strictEqual(negativeSeats.statusCode, 400);
+  });
+
+  it("rejects booking if the user does not exist in the database", async () => {
+    const invalidUser = await bookTourSlot({
+      slotId: testSlotId,
+      userId: "non-existent-user-id",
+      seats: 1,
+    });
+    assert.strictEqual(invalidUser.success, false);
+    assert.strictEqual(invalidUser.statusCode, 404);
+    assert.match(invalidUser.error || "", /User does not exist/);
+  });
+
+  it("rejects bookings for past tour slots", async () => {
+    const pastSlot = await prisma.tourSlot.create({
+      data: {
+        placeId: testPlaceId,
+        startsAt: new Date(Date.now() - 86400000), // yesterday
+        capacity: 10,
+      },
+    });
+
+    const result = await bookTourSlot({
+      slotId: pastSlot.id,
+      userId: testUsers[0].id,
+      seats: 1,
+    });
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.statusCode, 400);
+    assert.match(result.error || "", /past/i);
+
+    await prisma.tourSlot.delete({ where: { id: pastSlot.id } });
+  });
+
+  it("prevents duplicate bookings when a user retries rapidly (double-click safety)", async () => {
+    const freshSlot = await prisma.tourSlot.create({
+      data: {
+        placeId: testPlaceId,
+        startsAt: new Date(Date.now() + 100000000),
+        capacity: 5,
+      },
+    });
+
+    const user = testUsers[0];
+
+    const firstBooking = await bookTourSlot({
+      slotId: freshSlot.id,
+      userId: user.id,
+      seats: 1,
+    });
+    assert.strictEqual(firstBooking.success, true);
+    assert.strictEqual(firstBooking.remainingSeats, 4);
+
+    // Immediate duplicate retry with the same user and slot
+    const duplicateRetry = await bookTourSlot({
+      slotId: freshSlot.id,
+      userId: user.id,
+      seats: 1,
+    });
+
+    assert.strictEqual(duplicateRetry.success, true);
+    assert.strictEqual(duplicateRetry.isDuplicateRetry, true);
+    assert.strictEqual(duplicateRetry.bookingId, firstBooking.bookingId);
+    assert.strictEqual(duplicateRetry.remainingSeats, 4);
+
+    const dbCount = await prisma.booking.count({
+      where: { slotId: freshSlot.id, userId: user.id },
+    });
+    assert.strictEqual(dbCount, 1);
+
+    await prisma.booking.deleteMany({ where: { slotId: freshSlot.id } });
+    await prisma.tourSlot.delete({ where: { id: freshSlot.id } });
+  });
 });
 
