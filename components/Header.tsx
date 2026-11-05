@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useToast } from "./Toast";
 
 export interface User {
   id: string;
@@ -24,6 +25,19 @@ export function Header({
   selectedCategory,
   onSelectCategory,
 }: HeaderProps) {
+  const { addToast } = useToast();
+
+  const handleUserChange = (userId: string) => {
+    const found = users.find((u) => u.id === userId);
+    if (found) {
+      onSelectUser(found);
+      addToast(
+        "info",
+        `Now acting as ${found.name}. Bookings and reviews will be saved under this persona.`,
+        "Persona Switched"
+      );
+    }
+  };
   return (
     <header className="border-b border-zinc-200 bg-white sticky top-0 z-20 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -63,10 +77,7 @@ export function Header({
           <div className="relative">
             <select
               value={selectedUser?.id ?? ""}
-              onChange={(e) => {
-                const found = users.find((u) => u.id === e.target.value);
-                if (found) onSelectUser(found);
-              }}
+              onChange={(e) => handleUserChange(e.target.value)}
               className="appearance-none bg-zinc-50 hover:bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs font-semibold rounded-lg pl-3 pr-8 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
               {users.map((user) => (

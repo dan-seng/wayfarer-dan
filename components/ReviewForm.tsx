@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { User } from "./Header";
+import { useToast } from "./Toast";
 
 export interface ReviewItem {
   id: string;
@@ -27,6 +28,7 @@ export function ReviewForm({
   existingReviews,
   onReviewSubmitted,
 }: ReviewFormProps) {
+  const { addToast } = useToast();
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [body, setBody] = useState<string>("");
@@ -56,6 +58,7 @@ export function ReviewForm({
     e.preventDefault();
 
     if (!activeUser) {
+      addToast("error", "Please select an acting user in the header to post a review.", "Select User");
       setMessage({
         type: "error",
         text: "Please select an acting user in the header to post a review.",
@@ -64,6 +67,7 @@ export function ReviewForm({
     }
 
     if (!body.trim()) {
+      addToast("error", "Please write a short review before submitting.", "Empty Review");
       setMessage({
         type: "error",
         text: "Please write a few words about your experience.",
@@ -91,23 +95,29 @@ export function ReviewForm({
       const data = await res.json();
 
       if (!res.ok) {
+        const errorText = data.error || "Failed to submit review.";
+        addToast("error", errorText, "Submission Failed");
         setMessage({
           type: "error",
-          text: data.error || "Failed to submit review.",
+          text: errorText,
         });
       } else {
+        const successText = existingUserReview
+          ? "Your review has been updated!"
+          : "Review submitted successfully!";
+        addToast("success", successText, "Review Saved");
         setMessage({
           type: "success",
-          text: existingUserReview
-            ? "Your review has been updated!"
-            : "Review submitted successfully!",
+          text: successText,
         });
         onReviewSubmitted();
       }
     } catch {
+      const errorText = "Network error occurred while submitting.";
+      addToast("error", errorText, "Network Error");
       setMessage({
         type: "error",
-        text: "Network error occurred while submitting.",
+        text: errorText,
       });
     } finally {
       setSubmitting(false);
@@ -123,6 +133,8 @@ export function ReviewForm({
         <label className="text-xs font-semibold text-zinc-900">
           {existingUserReview
             ? `Update your rating as ${activeUser?.name}:`
+            : existingReviews.length === 0
+            ? `Be the first to rate as ${activeUser?.name || "Guest"}:`
             : `Your rating as ${activeUser?.name || "Guest"}:`}
         </label>
 
