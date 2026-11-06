@@ -25,7 +25,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-> **Environment Variables:** A pre-configured [.env.example](file:///.env.example) and [.env](file:///.env) are provided out of the box pointing to `localhost:5433` (isolated port to prevent collisions with any host Postgres instances).
+> **Environment Variables:** A pre-configured [.env.example](file:///.env.example) is provided out of the box with standard PostgreSQL defaults (`localhost:5432`, db: `wayfarer_db`, user: `wayfarer`). `npm run setup` automatically copies it to `.env` if not already present.
 
 ---
 
@@ -43,13 +43,34 @@ This runs both required test suites using Node's native test runner with `tsx`:
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Interface
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│  ● Wayfarer   [All] [History] [Food] [Nature]         Acting as: [Sara ▼]│
+├───────────────────────────────────┬────────────────────────────────────┤
+│ Sort: [Top rated (Honest) ▼]      │ National Museum                    │
+│                                   │ History · 4.7 ★ (312 reviews)      │
+│ National Museum                   │                                    │
+│ 4.7 ★ · 312 reviews · Honest: 4.68│ Guided tours                       │
+│                                   │ • Sat 09:00  4 of 10 left  [ Book ]│
+│ Holy Trinity Cathedral            │ • Sat 11:00  1 of 10 left  [ Book ]│
+│ 4.6 ★ · 188 reviews · Honest: 4.57│ • Sat 14:00  Fully booked  [ Full ]│
+│                                   │                                    │
+│ Brand-new café                    │ Reviews                            │
+│ 5.0 ★ · 1 review   · Honest: 3.75 │ ★★★★★ "Must see in Addis!" - Abel  │
+│ ↑ 1 review doesn't beat 312 reviews│                                   │
+│                                   │ Rate as Sara: ★★★★★                │
+│ [← Previous]  Page 1 of 2  [Next →]│ [Write a review...]      [Submit]  │
+└───────────────────────────────────┴────────────────────────────────────┘
+```
 
 * **"Acting as" User Switcher:** Seamlessly switch between seeded personas (**Sara**, **Abel**, **Liya**) in the top-right header via `x-user-id`. No password authentication required.
 * **Backend Category Filtering & Sorting:** Filter places by `All`, `History`, `Food`, and `Nature`. Sort by `Top rated (Honest)`, `Most reviewed`, `Highest raw stars`, or `Name`. All filtering and mathematical sorting happen strictly on the PostgreSQL backend.
 * **Review System with Upsert:** 1–5 star rating with text review. Enforces **one review per user per place**; reviewing again updates the user's existing review in place.
 * **Real-Time Seat Indicators & Booking:** Displays real-time seats left (e.g. `4 of 10 seats left`, `1 of 10 seats left`, `Fully booked`). Prevents double-clicks and gracefully communicates when a slot is full.
-* **Responsive Desktop Experience:** Clean two-column layout tailored for desktop discovery with mobile-friendly wrapping.
+* **Responsive Desktop & Mobile:** Clean two-column desktop discovery layout with responsive Master-Detail segmentation on phone screens.
+* **Dedicated Standalone Route:** Deep-linkable place pages at `/places/[id]` with `← Back to all places` navigation.
 
 ---
 
