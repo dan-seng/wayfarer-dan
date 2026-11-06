@@ -96,7 +96,10 @@ export async function GET(request: NextRequest) {
         hasPrevPage: page > 1,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.digest === "NEXT_PRERENDER_INTERRUPTED") {
+      throw error;
+    }
     console.error("Failed to query places:", error);
     return NextResponse.json(
       { error: "Failed to fetch places" },
