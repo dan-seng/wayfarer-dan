@@ -127,9 +127,9 @@ export function ReviewForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 mt-5 space-y-3"
+      className="bg-zinc-50 border border-zinc-200 rounded-xl p-3.5 sm:p-4 mt-5 space-y-3"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <label className="text-xs font-semibold text-zinc-900">
           {existingUserReview
             ? `Update your rating as ${activeUser?.name}:`
@@ -138,8 +138,8 @@ export function ReviewForm({
             : `Your rating as ${activeUser?.name || "Guest"}:`}
         </label>
 
-        {/* 1-5 Star Picker */}
-        <div className="flex items-center gap-1">
+        {/* 1-5 Star Picker with comfortable touch targets */}
+        <div className="flex items-center gap-1.5 py-0.5">
           {[1, 2, 3, 4, 5].map((star) => {
             const activeStarLevel = hoverRating ?? rating;
             const isFilled = star <= activeStarLevel;
@@ -151,7 +151,7 @@ export function ReviewForm({
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(null)}
                 onClick={() => setRating(star)}
-                className="text-lg text-amber-400 hover:scale-110 transition-transform focus:outline-none"
+                className="text-xl sm:text-lg text-amber-400 hover:scale-115 transition-transform focus:outline-none p-1 min-w-[32px] min-h-[32px] flex items-center justify-center touch-manipulation"
               >
                 {isFilled ? "★" : "☆"}
               </button>
@@ -180,7 +180,7 @@ export function ReviewForm({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
         <span className="text-[11px] text-zinc-500 italic">
           {existingUserReview
             ? "Rule: 1 review per user (updates existing)"
@@ -190,13 +190,13 @@ export function ReviewForm({
         <button
           type="submit"
           disabled={submitting}
-          className="px-4 py-1.5 text-xs font-semibold rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs disabled:opacity-50"
+          className="w-full sm:w-auto px-4 py-2 sm:py-1.5 text-xs font-semibold rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs disabled:opacity-50 text-center touch-manipulation"
         >
           {submitting
             ? "Saving..."
             : existingUserReview
-            ? "Update"
-            : "Submit"}
+            ? "Update Review"
+            : "Submit Review"}
         </button>
       </div>
     </form>

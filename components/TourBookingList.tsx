@@ -123,7 +123,7 @@ export function TourBookingList({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs">
+    <div className="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h4 className="text-sm font-bold text-zinc-900 tracking-tight">
@@ -148,7 +148,7 @@ export function TourBookingList({
           <span>{inlineAlert.message}</span>
           <button
             onClick={() => setInlineAlert(null)}
-            className="text-zinc-400 hover:text-zinc-600 font-bold ml-2 text-sm"
+            className="text-zinc-400 hover:text-zinc-600 font-bold ml-2 text-sm p-1 touch-manipulation"
           >
             ×
           </button>
@@ -170,13 +170,13 @@ export function TourBookingList({
             return (
               <div
                 key={slot.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-lg border transition-all ${
                   slot.isFull
                     ? "bg-zinc-100/60 border-zinc-200/60 opacity-80"
                     : "bg-zinc-50 border-zinc-200/70 hover:border-zinc-300"
                 }`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                   <span className="font-semibold text-xs text-zinc-900 min-w-[70px]">
                     {formatSlotTime(slot.startsAt)}
                   </span>
@@ -197,12 +197,12 @@ export function TourBookingList({
                   </span>
                 </div>
 
-                <div>
+                <div className="w-full sm:w-auto flex justify-end">
                   {slot.isFull ? (
                     <button
                       disabled
                       title="This tour is fully booked"
-                      className="px-3.5 py-1.5 text-xs font-semibold rounded-md bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300/60"
+                      className="w-full sm:w-auto px-4 py-2 sm:py-1.5 text-xs font-semibold rounded-md bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300/60 text-center"
                     >
                       Full
                     </button>
@@ -210,7 +210,7 @@ export function TourBookingList({
                     <button
                       disabled={isBookingThis}
                       onClick={() => handleBook(slot.id)}
-                      className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all shadow-xs ${
+                      className={`w-full sm:w-auto justify-center px-4 py-2 sm:py-1.5 text-xs font-semibold rounded-md transition-all shadow-xs touch-manipulation ${
                         isLowSeats
                           ? "bg-amber-600 hover:bg-amber-700 text-white"
                           : "bg-blue-600 hover:bg-blue-700 text-white"

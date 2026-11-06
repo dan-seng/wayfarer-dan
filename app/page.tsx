@@ -28,16 +28,23 @@ export default function Home() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"list" | "detail">("list");
 
   // Reset page when category or sort changes
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
+    setMobileTab("list");
   };
 
   const handleSortChange = (sort: string) => {
     setSortOption(sort);
     setCurrentPage(1);
+  };
+
+  const handleSelectPlace = (id: string) => {
+    setSelectedPlaceId(id);
+    setMobileTab("detail");
   };
 
   // 1. Fetch Users on mount
@@ -103,6 +110,8 @@ export default function Home() {
     fetchPlaces();
   }, [fetchPlaces]);
 
+  const selectedPlace = places.find((p) => p.id === selectedPlaceId);
+
   return (
     <ToastProvider>
       <div className="min-h-screen bg-zinc-100/70 text-zinc-900 flex flex-col font-sans">
@@ -116,13 +125,44 @@ export default function Home() {
           onSelectCategory={handleCategoryChange}
         />
 
-        {/* Main Two-Column Layout */}
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Main Two-Column Layout (Responsive Master-Detail on mobile) */}
+        <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 lg:p-8">
+          {/* Mobile Segmented View Control (hidden on lg+) */}
+          <div className="lg:hidden flex items-center bg-zinc-200/80 p-1 rounded-xl mb-4 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setMobileTab("list")}
+              className={`flex-1 py-2 rounded-lg text-center transition-all touch-manipulation ${
+                mobileTab === "list"
+                  ? "bg-white text-zinc-900 shadow-xs"
+                  : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              Places ({pagination ? pagination.totalCount : places.length})
+            </button>
+            <button
+              type="button"
+              disabled={!selectedPlaceId}
+              onClick={() => setMobileTab("detail")}
+              className={`flex-1 py-2 rounded-lg text-center transition-all touch-manipulation truncate px-2 ${
+                mobileTab === "detail"
+                  ? "bg-white text-zinc-900 shadow-xs"
+                  : "text-zinc-600 hover:text-zinc-900 disabled:opacity-40"
+              }`}
+            >
+              {selectedPlace ? selectedPlace.name : "Place Details"}
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Places List with Backend Sort */}
-            <section className="lg:col-span-5 bg-white border border-zinc-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col">
+            <section
+              className={`lg:col-span-5 bg-white border border-zinc-200 rounded-2xl p-4 sm:p-5 shadow-xs flex-col ${
+                mobileTab === "detail" ? "hidden lg:flex" : "flex"
+              }`}
+            >
               {/* Sorting controls */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-zinc-100">
                 <span className="text-xs font-bold text-zinc-700 tracking-tight">
                   Places ({pagination ? pagination.totalCount : places.length})
                 </span>
@@ -181,13 +221,13 @@ export default function Home() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-2.5 overflow-y-auto max-h-[calc(100vh-250px)] pr-1">
+                <div className="space-y-2.5 lg:overflow-y-auto lg:max-h-[calc(100vh-250px)] pr-0 lg:pr-1">
                   {places.map((place) => (
                     <PlaceCard
                       key={place.id}
                       place={place}
                       isSelected={place.id === selectedPlaceId}
-                      onSelect={() => setSelectedPlaceId(place.id)}
+                      onSelect={() => handleSelectPlace(place.id)}
                     />
                   ))}
                 </div>
@@ -200,7 +240,7 @@ export default function Home() {
                     type="button"
                     disabled={!pagination.hasPrevPage || loading}
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className="px-3 py-1.5 rounded-lg border border-zinc-300 font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-zinc-300 font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors touch-manipulation"
                   >
                     ← Previous
                   </button>
@@ -213,7 +253,7 @@ export default function Home() {
                     type="button"
                     disabled={!pagination.hasNextPage || loading}
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    className="px-3 py-1.5 rounded-lg border border-zinc-300 font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-zinc-300 font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors touch-manipulation"
                   >
                     Next →
                   </button>
@@ -222,11 +262,16 @@ export default function Home() {
             </section>
 
             {/* Right Column: Place Details, Tour Booking, Reviews */}
-            <section className="lg:col-span-7">
+            <section
+              className={`lg:col-span-7 ${
+                mobileTab === "list" ? "hidden lg:block" : "block"
+              }`}
+            >
               <PlaceDetail
                 placeId={selectedPlaceId}
                 activeUser={activeUser}
                 onDataChanged={fetchPlaces}
+                onBackToList={() => setMobileTab("list")}
               />
             </section>
           </div>

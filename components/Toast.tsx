@@ -39,8 +39,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      {/* Floating Toast Notification Stack in bottom-right */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0">
+      {/* Floating Toast Notification Stack: centered bottom on mobile, bottom-right on desktop */}
+      <div className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-5 sm:bottom-5 z-50 flex flex-col gap-2 sm:max-w-sm pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}

@@ -72,13 +72,15 @@ export function Header({
         </div>
 
         {/* User Switcher (Acting As...) */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-500 font-medium">Acting as:</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="text-xs text-zinc-500 font-medium hidden sm:inline">Acting as:</span>
+          <span className="text-sm sm:hidden" title="Acting as" aria-hidden="true">👤</span>
           <div className="relative">
             <select
               value={selectedUser?.id ?? ""}
               onChange={(e) => handleUserChange(e.target.value)}
-              className="appearance-none bg-zinc-50 hover:bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs font-semibold rounded-lg pl-3 pr-8 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              aria-label="Acting as persona"
+              className="appearance-none bg-zinc-50 hover:bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs font-semibold rounded-lg pl-2.5 pr-7 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -86,24 +88,24 @@ export function Header({
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-500 text-xs">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-zinc-500 text-xs">
               ▼
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Category Bar */}
-      <div className="sm:hidden px-4 pb-3 flex items-center gap-1.5 overflow-x-auto">
+      {/* Mobile Category Bar (Smooth horizontal scroll) */}
+      <div className="sm:hidden px-4 pb-2.5 pt-0.5 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
         {categories.map((cat) => {
           const isActive = selectedCategory.toLowerCase() === cat.toLowerCase();
           return (
             <button
               key={cat}
               onClick={() => onSelectCategory(cat)}
-              className={`px-3 py-1 text-xs font-medium rounded-md whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-all touch-manipulation ${
                 isActive
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white font-semibold shadow-xs"
                   : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
               }`}
             >

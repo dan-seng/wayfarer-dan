@@ -23,12 +23,14 @@ interface PlaceDetailProps {
   placeId: string | null;
   activeUser: User | null;
   onDataChanged: () => void;
+  onBackToList?: () => void;
 }
 
 export function PlaceDetail({
   placeId,
   activeUser,
   onDataChanged,
+  onBackToList,
 }: PlaceDetailProps) {
   const [place, setPlace] = useState<PlaceDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -92,8 +94,18 @@ export function PlaceDetail({
 
   return (
     <div className="space-y-6">
+      {onBackToList && (
+        <button
+          type="button"
+          onClick={onBackToList}
+          className="lg:hidden inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-zinc-50 touch-manipulation"
+        >
+          ← Back to places list
+        </button>
+      )}
+
       {/* Place Header Info */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs">
+      <div className="bg-white border border-zinc-200 rounded-2xl p-4 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-100">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
